@@ -6,7 +6,5 @@
   "scripts": {
     "start": "tsc -w",
     "build": "tsc"
-  },
-  "dependencies": {
   }
 }
