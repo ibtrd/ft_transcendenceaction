@@ -14,6 +14,7 @@ db.exec(`
   )
 `);
 
+
 db.exec(`
   CREATE TRIGGER IF NOT EXISTS update_accounts_updated_at
   AFTER UPDATE ON accounts
@@ -24,7 +25,8 @@ db.exec(`
 `)
 
 // Password authentication
-db.exec(`CREATE TABLE IF NOT EXISTS password_auth (
+db.exec(`
+  CREATE TABLE IF NOT EXISTS password_auth (
     id INTEGER PRIMARY KEY,
     hash TEXT NOT NULL,
     salt TEXT NOT NULL,

@@ -14,7 +14,7 @@ export default function accountsRoutes(fastify, opts, done) {
     return db.prepare(`SELECT * FROM accounts LIMIT ? OFFSET ?`).all(safeLimit, safeOffset);
   });
 
-  // get the ccount associated to an email
+  // get the account associated to an email
   fastify.get("/:email", async function handler(request, reply) {
     const { email } = request.params;
 

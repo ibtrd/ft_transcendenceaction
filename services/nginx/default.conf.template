@@ -13,13 +13,7 @@ server {
     }
 
     location /api/registration/ {
+        rewrite ^/api/registration/(.*)$ /$1 break;
         proxy_pass http://registration:3000;
     }
-}
-
-server {
-    listen 80;
-    server_name ${NGINX_HOST};
-
-    return 301 https://$server_name$request_uri;
 }
