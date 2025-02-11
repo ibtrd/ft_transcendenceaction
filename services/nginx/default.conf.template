@@ -1,0 +1,25 @@
+server {
+    listen 443 ssl;
+    server_name ${NGINX_HOST};
+
+    ssl_certificate /run/secrets/ssl-crt;
+    ssl_certificate_key /run/secrets/ssl-key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    location / {
+        root /usr/share/nginx/html;
+        index index.html;
+    }
+
+    location /api/registration/ {
+        proxy_pass http://registration:3000;
+    }
+}
+
+server {
+    listen 80;
+    server_name ${NGINX_HOST};
+
+    return 301 https://$server_name$request_uri;
+}
