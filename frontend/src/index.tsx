@@ -9,12 +9,24 @@ function Counter({name, test}) {
 	</h1>
 }
 
+function TestCount ({count, setCount}) {
+	return <div>
+		{count > 5 ? <p>Count is greater than 5</p> : <p>Count is lower than 5</p>}
+		<p style={count > 5 ? 'color: red;' : ''}>Count: {count}</p>
+		<button onClick={() => setCount(count + 1)}>+</button>
+		<button onClick={() => setCount(count - 1)}>-</button>
+	</div>
+
+}
+
 
 function Input() {
 	const [state, setState] = Babact.useState('')
+	const [count, setCount] = Babact.useState(0)
 	return <div>
 			<input onInput={(e) => setState(e.target.value)}  />
 			<p>{state}</p>
+			<TestCount count={count} setCount={setCount}/>
 		</div>
 }
 
