@@ -1,0 +1,12 @@
+{
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "start": "tsc -w",
+    "build": "tsc"
+  },
+  "dependencies": {
+  }
+}
