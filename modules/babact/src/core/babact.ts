@@ -41,7 +41,7 @@ export function workLoop(deadline: IdleDeadline) {
 		commitRoot()
 	}
 
-	requestIdleCallback(workLoop);
+	window.requestIdleCallback(workLoop);
 }
 
 
@@ -98,6 +98,42 @@ function useState(initial: any) {
     hookIndex++;
     return [hook.state, setState];
 }
+
+export function useEffect(callback: () => void | (() => void), deps: any[]) {
+    const oldHook =
+        wipFiber.alternate &&
+        wipFiber.alternate.hooks &&
+        wipFiber.alternate.hooks[hookIndex];
+
+    const hook = {
+        deps,
+        cleanup: null as (() => void) | null,
+    };
+
+    if (!oldHook) {
+        const cleanup = callback();
+        if (typeof cleanup === 'function') {
+            hook.cleanup = cleanup;
+        }
+    } else {
+        const hasChanged = !oldHook.deps || oldHook.deps.some((dep, i) => dep !== deps[i]);
+        if (hasChanged) {
+            if (oldHook.cleanup) {
+                oldHook.cleanup();
+            }
+            const cleanup = callback();
+            if (typeof cleanup === 'function') {
+                hook.cleanup = cleanup;
+            }
+        } else {
+            hook.cleanup = oldHook.cleanup;
+        }
+    }
+
+    wipFiber.hooks.push(hook);
+    hookIndex++;
+}
+
 
 function performUnitOfWork(fiber: Fiber): Fiber {
 	const isFunctionComponent: Boolean = fiber.tag instanceof Function;
@@ -174,6 +210,7 @@ function reconcileChildren(wipFiber: Fiber, elements) {
 	}
 }
 
+
 function commitRoot() {
 	deletions.forEach(commitWork);
 	commitWork(wipRoot.child)
@@ -217,13 +254,31 @@ function updateDom(dom: HTMLElement, prevProps: Props, nextProps: Props) {
         });
 }
 
+function removeEffect(fiber: Fiber) {
+	if (!fiber) {
+		return;
+	}
+	if (fiber.hooks) {
+		fiber.hooks.forEach(hook => {
+			if (hook.cleanup) {
+				hook.cleanup();
+				hook.cleanup = null;
+			}
+		});
+	}
+	removeEffect(fiber.child);
+	removeEffect(fiber.sibling);
+}
+
 function commitDeletion(fiber: Fiber, domParent: HTMLElement | Text) {
-	if (fiber.dom) {
-		domParent.removeChild(fiber.dom);
-	} else {
+	removeEffect(fiber);
+    if (fiber.dom) {
+        domParent.removeChild(fiber.dom);
+    } else {
 		commitDeletion(fiber.child, domParent);
 	}
 }
+
 
 function commitWork(fiber: Fiber | null) {
     if (!fiber) {
@@ -266,8 +321,9 @@ const Babact = {
 	createElement,
 	render,
 	useState,
+	useEffect,
 }
 
-requestIdleCallback(workLoop);
+window.requestIdleCallback(workLoop);
 
 export default Babact;
