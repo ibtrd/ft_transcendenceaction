@@ -8,5 +8,7 @@
 		"lib": ["ES2015", "DOM", "ES6", "ES5"],
 		"jsx": "react",
 		"jsxFactory": "Babact.createElement",
+		"jsxFragmentFactory": "Babact.fragment",
+		"sourceMap": true
 	}
 }

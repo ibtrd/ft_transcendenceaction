@@ -1,19 +1,30 @@
-export function createElement(tag: String, props: Object, ...children: Array<String | Object>) {
+import { SpecialElementTag, IElement } from './Element';
+
+// Children:
+// Either, an array of element, text or an Element
+// if text is passed. An element with SpecialElementTag.TEXT_ELEMENT tag replace it
+export function createElement(
+        tag: String,
+        props: Object,
+        ...children: Array<String | IElement | IElement[]>
+    ): IElement {
+
+    let nchildren: Array<String | IElement> = children.flatMap((child) => Array.isArray(child) ? child : [child])
     return {
         tag,
         props: {
             ...props,
-            children: children.map(child => {
-                return typeof child === 'object' ? child : createTextElement(child);
+            children: nchildren.map((child) : IElement => {
+                return typeof child === 'object' ? child as IElement : createTextElement(child);
             })
         }
     }
 }
 
 
-function createTextElement(text: String) {
+function createTextElement(text: String): IElement {
     return {
-        tag: 'TEXT_ELEMENT',
+        tag: SpecialElementTag.TEXT_ELEMENT,
         props: {
             nodeValue: text,
             children: []

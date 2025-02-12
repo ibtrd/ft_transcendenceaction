@@ -1,8 +1,10 @@
-import { Fiber } from './babact';
 
-export function createDom(fiber: Fiber) {
-	const dom: HTMLElement | Text =
-		fiber.tag === 'TEXT_ELEMENT' ?
+import { SpecialElementTag } from './Element';
+import { IFiber, NodeElement } from './Fiber';
+
+export function createDom(fiber: IFiber) : NodeElement {
+	const dom: NodeElement =
+		fiber.tag === SpecialElementTag.TEXT_ELEMENT ?
 		document.createTextNode(fiber.props.nodeValue) :
 		document.createElement(fiber.tag as string);
 	Object.keys(fiber.props)
@@ -17,6 +19,5 @@ export function createDom(fiber: Fiber) {
             }
 		}
 	);
-
 	return dom;
 }
