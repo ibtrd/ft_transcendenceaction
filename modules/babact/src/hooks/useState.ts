@@ -1,6 +1,6 @@
 import BabactState from "../core/BabactState";
 
-export default function useState(initial: any) {
+export default function useState(initial?: any) {
     const oldHook =
 		BabactState.wipFiber.alternate &&
 		BabactState.wipFiber.alternate.hooks &&

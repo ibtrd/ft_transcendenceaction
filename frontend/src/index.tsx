@@ -1,10 +1,14 @@
 import Babact from "babact";
 
-const ThemeContext = Babact.createContext('light');
+const ThemeContext = Babact.createContext();
+const RouterContext = Babact.createContext();
 
 function View1() {
+
+    const { theme } = Babact.useContext(ThemeContext);
+
     return (
-        <div>
+        <div style={`background-color: ${theme === 'light' ? 'white' : 'black'}; color: ${theme === 'light' ? 'black' : 'white'}`}>
             <h1>View 1</h1>
             <p>Some text</p>
             <Input />
@@ -15,12 +19,14 @@ function View1() {
 
 function View2() {
 
-    const theme = Babact.useContext(ThemeContext);
+    const { path } = Babact.useContext(RouterContext);
+
     return (
         <div>
             <h1>View 2</h1>
             <p>Some text</p>
-            <p>{theme}</p>
+            <ThemeButton />
+            <p>Path: {path}</p>
         </div>
     );
 }
@@ -49,30 +55,49 @@ function Test({ children }) {
 }
 
 
+function ThemeButton() {
+    const {theme, setTheme} = Babact.useContext(ThemeContext);
+
+    return <button onClick={theme === 'light' ? () => setTheme('dark') : () =>setTheme('light')}>{theme}</button>;
+}
+
 function Input() {
-    const [state, setState] = Babact.useState('');
+    const {path, setPath} = Babact.useContext(RouterContext);
     return <div>
-        <input onInput={(e) => setState(e.target.value)}  value={state}/>
-        <p>{state}</p>
+        <input onInput={(e) => setPath(e.target.value)}  value={path}/>
+        <p>{path}</p>
     </div>
 }
 
-const container = document.getElementById("root");
-function App() {
-    const element = (
-        <div>
-            <h1>App</h1>
+
+function App()  {
+
+    const [theme, setTheme] = Babact.useState('light');
+    const [path, setPath] = Babact.useState('/');
+
+    return <div>
+        <h1>App</h1>
+        {/* @ts-ignore */}
+        <ThemeContext.Provider value={{
+            theme,
+            setTheme
+        }}>
             {/* @ts-ignore */}
-            <ThemeContext.Provider>
+            <RouterContext.Provider value={{
+                path,
+                setPath
+            }}>
                 {/* @ts-ignore */}
                 <Test>
                     <View1 />
                     <View2 />
                 </Test>
-            </ThemeContext.Provider>
-        </div>
-    );
-    Babact.render(element, container);
+            </RouterContext.Provider>
+        </ThemeContext.Provider>
+    </div>
 }
 
-App();
+
+const container = document.getElementById("root");
+Babact.render(<App/>, container);
+

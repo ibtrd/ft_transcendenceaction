@@ -23,5 +23,5 @@ export interface IFiber extends IElement {
 	effectTag?: EffectTag,
 	props: FiberProps,
 	hooks?: Array<any>,
-	context?: Object,
+	context?: Map<number, any>,
 }

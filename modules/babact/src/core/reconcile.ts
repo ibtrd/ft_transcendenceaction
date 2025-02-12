@@ -25,6 +25,7 @@ export function reconcileChildren(wipFiber: IFiber, elements: IElement[]) {
 				sibling: null,
 				alternate: oldFiber,
 				effectTag: EffectTag.Update,
+				context: oldFiber.context,
 			};
 		}
 		if (element && !sameType) {

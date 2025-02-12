@@ -32,6 +32,7 @@ function updateFunctionComponent(fiber: IFiber) {
 	BabactState.wipFiber = fiber;
 	BabactState.hookIndex = 0;
 	BabactState.wipFiber.hooks = [];
+	BabactState.wipFiber.context = new Map();
 	const tag = fiber.tag as FunctionComponent;
 	const children = [tag(fiber.props)];
 	const flatchildren: IElement[] = children.flat(Infinity) as IElement[];
