@@ -1,4 +1,4 @@
-import Babact from "../node_modules/Babact/dist/index.js";
+import Babact from "babact";
 
 function Counter({name, test}) {
 	const [state, setState] = Babact.useState(1)
@@ -12,7 +12,7 @@ function Counter({name, test}) {
 function TestCount ({count, setCount}) {
 	return <div>
 		{count > 5 ? <p>Count is greater than 5</p> : <p>Count is lower than 5</p>}
-		<p style={count > 5 ? 'color: red;' : ''}>Count: {count}</p>
+		<p style={count > 5 ? 'color: red;' : ''}>Count asd: {count}</p>
 		<button onClick={() => setCount(count + 1)}>+</button>
 		<button onClick={() => setCount(count - 1)}>-</button>
 	</div>
