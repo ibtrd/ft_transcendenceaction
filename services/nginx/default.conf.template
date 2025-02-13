@@ -1,6 +1,5 @@
 server {
     listen 443 ssl;
-    server_name ${NGINX_HOST};
 
     ssl_certificate /run/secrets/ssl-crt;
     ssl_certificate_key /run/secrets/ssl-key;
@@ -15,5 +14,15 @@ server {
     location /api/registration/ {
         rewrite ^/api/registration/(.*)$ /$1 break;
         proxy_pass http://registration:3000;
+    }
+
+    location /api/authentification/ {
+        rewrite ^/api/authentification/(.*)$ /$1 break;
+        proxy_pass http://authentification:3000;
+    }
+
+    location /api/auth/fortytwo/ {
+        rewrite ^/api/auth/fortytwo/(.*)$ /$1 break;
+        proxy_pass http://fortytwo-auth:3000;
     }
 }
