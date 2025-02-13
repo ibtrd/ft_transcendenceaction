@@ -1,5 +1,5 @@
-import { client_id, client_secret, redirect_uri } from "./api_credendials.js";
-import ft_fetch from "ft_fetch";
+import { client_id, client_secret, redirect_uri } from "./env.js";
+import ft_fetch, { BadRequestError, ServiceUnavailableError, UnauthorizedError } from "ft_fetch";
 import { HttpError, BadGatewayError } from "ft_fetch";
 
 export default function routes(fastify, opts, done) {
@@ -8,7 +8,22 @@ export default function routes(fastify, opts, done) {
     reply.redirect(url);
   });
 
-  fastify.get("/callback", { schema: callbackSchema }, async function handler(request, reply) {
+  fastify.get("/callback", {
+      schema: callbackSchema,
+      onRequest: async (request, reply) => {
+        try {
+          await request.jwtVerify({ onlyCookie: true });
+        } catch (err) {
+          if (err.code == 'FST_JWT_NO_AUTHORIZATION_IN_HEADER') return;
+          if (err.code === 'FST_JWT_AUTHORIZATION_TOKEN_INVALID') {
+            reply.clearCookie('access_token', { path: '/' });
+            throw new UnauthorizedError("Invalid authorization token");
+          }
+          return;
+        }
+        throw new BadRequestError("You are already authenticated with an active session")
+      }
+    }, async function handler(request, reply) {
     const { code } = request.query;
 
     try {
@@ -36,15 +51,22 @@ export default function routes(fastify, opts, done) {
 
 async function getIntraUser(code) {
   const token = await generateUserToken(code);
-  const user = await ft_fetch(`https://api.intra.42.fr/v2/me`, {
-    headers: {
-      "Authorization": `Bearer ${token}`
+  try {
+    const user = await ft_fetch(`https://api.intra.42.fr/v2/me`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+    if (!user || !user.email || !user.id) {
+      throw new BadGatewayError();
     }
-  })
-  if (!user || !user.email || !user.id) {
-    throw new BadGatewayError();
+    return user;
+  } catch (err) {
+    if (err instanceof HttpError && err.statusCode == 429) {
+      throw new ServiceUnavailableError();
+    }
+    throw err;
   }
-  return user;
 }
 
 async function generateUserToken(code) {

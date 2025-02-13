@@ -1,24 +1,21 @@
-const jwt_secret = process.env.JWT_SECRET;
-if (!jwt_secret) {
-  console.error("Missing environment variable: JWT_SECRET");
-  process.exit(1);
-}
-
 import Fastify from 'fastify';
 const fastify = Fastify();
 
-import fastifyCookie from '@fastify/cookie';
-fastify.register(fastifyCookie, {
-  // secret: 'some-secret', // Optional: for signing cookies
-});
-
-import fastifyJWT from '@fastify/jwt';
-fastify.register(fastifyJWT, {
-  secret: jwt_secret
-})
-
 import fastifyFormbody from '@fastify/formbody';
 fastify.register(fastifyFormbody);
+
+import fastifyCookie from '@fastify/cookie';
+fastify.register(fastifyCookie);
+
+import fastifyJWT from '@fastify/jwt';
+import { jwt_secret } from './env.js';
+fastify.register(fastifyJWT, {
+  secret: jwt_secret,
+  cookie: {
+    cookieName: 'access_token',
+    signed: false
+  }
+})
 
 import routes from './routes.js';
 fastify.register(routes);

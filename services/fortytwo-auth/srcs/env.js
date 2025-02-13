@@ -15,3 +15,9 @@ if (!redirect_uri) {
   console.error("Missing environment variable: API42_REDIRECT_URI");
   process.exit(1);
 }
+
+export const jwt_secret = process.env.JWT_SECRET;
+if (!jwt_secret) {
+  console.error("Missing environment variable: JWT_SECRET");
+  process.exit(1);
+}
