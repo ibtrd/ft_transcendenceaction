@@ -1,8 +1,7 @@
 import BabactState from "./BabactState";
-import { IFiber } from "./Fiber";
-import { ElementProps } from "./Element";
+import { IFiber, NodeElement } from "./Fiber";
 
-export function render(element: IFiber, container: HTMLElement) {
+export function render(element: IFiber, container: NodeElement) {
 	BabactState.wipRoot = {
 		dom: container,
 		props: {
