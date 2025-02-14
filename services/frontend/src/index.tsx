@@ -2,7 +2,6 @@ import Babact from "babact";
 import { Router, Route, Routes, Link } from "babact-router-dom";
 
 
-
 function View1() {
 
     return (
