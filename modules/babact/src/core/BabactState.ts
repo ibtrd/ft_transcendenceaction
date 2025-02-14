@@ -7,6 +7,7 @@ export interface IBabactState {
 	deletions: IFiber[] | null;
 	wipFiber: IFiber | null;
 	hookIndex: number;
+	effects: any[];
 }
 
 const BabactState = {
@@ -16,6 +17,7 @@ const BabactState = {
 	deletions: null,
 	wipFiber: null,
 	hookIndex: 0,
+	effects: [],
 } as IBabactState;
 
 export default BabactState;

@@ -1,3 +1,4 @@
+import { removeEffect } from "../hooks/useEffect";
 import BabactState from "./BabactState";
 import { ElementProps } from "./Element";
 import { EffectTag, IFiber } from "./Fiber";
@@ -8,6 +9,17 @@ export function commitRoot() {
 	commitWork(BabactState.wipRoot.child)
 	BabactState.currentRoot = BabactState.wipRoot;
 	BabactState.wipRoot = null;
+
+	BabactState.effects.forEach((hook) => {
+		if (hook.effect) {
+			if (hook.cleanup) {
+				hook.cleanup();
+			}
+			hook.cleanup = hook.effect();
+		}
+	});
+
+	BabactState.effects = [];
 }
 
 export function commitWork(fiber: IFiber | null) {
@@ -27,6 +39,10 @@ export function commitWork(fiber: IFiber | null) {
 		commitDeletion(fiber, domParent);
 		return;
 	}
+
+	if (fiber.hooks)
+		BabactState.effects.push(...fiber.hooks.filter(hook => hook.tag === 'effect'));
+
 	commitWork(fiber.child);
 	commitWork(fiber.sibling);
 }
@@ -76,18 +92,3 @@ function commitDeletion(fiber: IFiber, domParent: HTMLElement | Text) {
 	}
 }
 
-function removeEffect(fiber: IFiber) {
-	if (!fiber) {
-		return;
-	}
-	if (fiber.hooks) {
-		fiber.hooks.forEach(hook => {
-			if (hook.cleanup) {
-				hook.cleanup();
-				hook.cleanup = null;
-			}
-		});
-	}
-	removeEffect(fiber.child);
-	removeEffect(fiber.sibling);
-}

@@ -8,29 +8,40 @@ export default function useEffect(callback: () => void | (() => void), deps: any
 
     const hook = {
         deps,
-        cleanup: null as (() => void) | null,
+        effect: null,
+        cleanup: null,
+        tag: 'effect'
     };
 
+    const hasChanged = oldHook && (!oldHook.deps || oldHook.deps.some((dep, i) => dep !== deps[i]));
+
     if (!oldHook) {
-        const cleanup = callback();
-        if (typeof cleanup === 'function') {
-            hook.cleanup = cleanup;
-        }
-    } else {
-        const hasChanged = !oldHook.deps || oldHook.deps.some((dep, i) => dep !== deps[i]);
-        if (hasChanged) {
-            if (oldHook.cleanup) {
-                oldHook.cleanup();
-            }
-            const cleanup = callback();
-            if (typeof cleanup === 'function') {
-                hook.cleanup = cleanup;
-            }
-        } else {
-            hook.cleanup = oldHook.cleanup;
-        }
+        hook.effect = callback;
+    }
+    else if (hasChanged) {
+        hook.effect = callback;
+        hook.cleanup = oldHook.cleanup
+    }
+    else {
+        hook.effect = null;
+        hook.cleanup = oldHook.cleanup;
     }
 
     BabactState.wipFiber.hooks.push(hook);
     BabactState.hookIndex++;
+}
+
+
+export function removeEffect(fiber: any) {
+    if (!fiber)
+        return;
+    if (fiber.hooks) {
+        fiber.hooks.forEach(hook => {
+            if (hook.cleanup) {
+                hook.cleanup();
+                hook.cleanup = null;
+            }
+        });
+    }
+
 }

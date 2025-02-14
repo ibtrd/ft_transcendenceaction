@@ -10,7 +10,6 @@ export function reconcileChildren(wipFiber: IFiber, elements: IElement[]) {
 	for (let i = 0; i < elements.length || oldFiber != null; i++) {
 		const element = elements[i];
 		let newFiber: IFiber = null;
-		console.log('old', oldFiber, wipFiber.alternate);
 		const sameType =
 			oldFiber &&
 			element &&
@@ -40,12 +39,8 @@ export function reconcileChildren(wipFiber: IFiber, elements: IElement[]) {
 				alternate: null,
 				effectTag: EffectTag.Placement,
 			};
-			console.log('new', newFiber);
-			console.log('element', element);
-			console.log('sameType', sameType);
 		}
 		if (oldFiber && !sameType) {
-			console.log('delete', oldFiber);
 			oldFiber.effectTag = EffectTag.Deletion;
 			BabactState.deletions.push(oldFiber);
 		}

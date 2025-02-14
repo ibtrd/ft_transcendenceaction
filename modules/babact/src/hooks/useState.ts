@@ -13,7 +13,7 @@ export default function useState(initial?: any) {
 
     const actions = oldHook ? oldHook.queue : [];
     actions.forEach(action => {
-        hook.state = typeof action === 'function' ? action(hook.state) : action;
+        hook.state = action instanceof Function ? action(hook.state) : action;
     });
 
     const setState = (action: any) => {
