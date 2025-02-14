@@ -6,7 +6,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default {
-  devtool: 'inline-source-map',
   entry: "./src/index.tsx",
   output: {
     filename: "bundle.js",
@@ -29,5 +28,9 @@ export default {
       patterns: [{ from: "public", to: "." }],
     }),
   ],
+  devtool: 'inline-source-map',
   mode: "development",
+  devServer: {
+    historyApiFallback: true,
+  },
 };

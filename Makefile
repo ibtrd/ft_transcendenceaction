@@ -12,3 +12,4 @@ $(SSL_CERTIFICATE):
             -out secrets/localhost.crt \
             -keyout secrets/localhost.key \
             -subj "/C=FR/ST=Rhone-Alpes/L=Lyon/O=YATT/OU=IT Department/CN=www.localhost.com"
+

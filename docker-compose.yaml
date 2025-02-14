@@ -7,12 +7,25 @@ services:
     ports:
       - "8080:443"
     networks:
-      - frontend
+      - proxy
     environment:
       - NGINX_HOST=localhost
     secrets:
       - ssl-crt
       - ssl-key
+
+  frontend:
+    build:
+      context: services/frontend/
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/frontend/src:/services/frontend/src
+      - ./services/frontend/public:/services/frontend/public
+      - ./modules/:/modules:ro
+    ports:
+      - "127.0.0.1:4242:8080"
+    networks:
+      - proxy
 
   credentials:
     build:
@@ -40,8 +53,8 @@ services:
       - "127.0.0.1:3001:3000"
     networks:
       - credentials
-      - frontend
-    
+      - proxy
+
   # password-auth:
   #   build:
   #     context: services/password-auth/
@@ -55,8 +68,8 @@ services:
   #     - "127.0.0.1:3002:3000"
   #   networks:
   #     - credentials
-  #     - frontend
-  
+  #     - proxy
+
   fortytwo-auth:
     build:
       context: services/fortytwo-auth/
@@ -74,7 +87,7 @@ services:
       - "127.0.0.1:3042:3000"
     networks:
       - credentials
-      - frontend
+      - proxy
 
   # profiles-api:
   #   build:
@@ -89,7 +102,7 @@ services:
   #     - credentials
 
 networks:
-  frontend:
+  proxy:
     driver: bridge
   credentials:
     driver: bridge
