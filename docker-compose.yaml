@@ -1,0 +1,103 @@
+services:
+  nginx:
+    image: nginx:1.26.3-alpine
+    volumes:
+      - ./services/nginx:/etc/nginx/templates:ro
+      - ./front:/front
+    ports:
+      - "8080:443"
+    networks:
+      - frontend
+    environment:
+      - NGINX_HOST=localhost
+    secrets:
+      - ssl-crt
+      - ssl-key
+
+  credentials:
+    build:
+      context: services/credentials/
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./sqlite:/database
+      - ./services/credentials/srcs:/services/credentials/srcs
+      - ./modules/:/modules:ro
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - credentials
+
+  registration:
+    build:
+      context: services/registration/
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/registration/srcs:/services/registration/srcs
+      - ./modules/:/modules:ro
+    environment:
+      - PASSWORD_PEPPER=${PASSWORD_PEPPER}
+    ports:
+      - "127.0.0.1:3001:3000"
+    networks:
+      - credentials
+      - frontend
+    
+  # password-auth:
+  #   build:
+  #     context: services/password-auth/
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - ./services/password-auth/srcs:/services/password-auth/srcs
+  #   environment:
+  #     - PASSWORD_PEPPER=${PASSWORD_PEPPER}
+  #     - JWT_SECRET=$(JWT_SECRET)
+  #   ports:
+  #     - "127.0.0.1:3002:3000"
+  #   networks:
+  #     - credentials
+  #     - frontend
+  
+  fortytwo-auth:
+    build:
+      context: services/fortytwo-auth/
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/fortytwo-auth/srcs:/services/fortytwo-auth/srcs
+      - ./modules/:/modules:ro
+    environment:
+      - PASSWORD_PEPPER=${PASSWORD_PEPPER}
+      - JWT_SECRET=${JWT_SECRET}
+      - API42_CLIENT_ID=${API42_CLIENT_ID}
+      - API42_SECRET=${API42_SECRET}
+      - API42_REDIRECT_URI=${API42_REDIRECT_URI}
+    ports:
+      - "127.0.0.1:3042:3000"
+    networks:
+      - credentials
+      - frontend
+
+  # profiles-api:
+  #   build:
+  #     context: services/profiles-api/
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - ./sqlite:/database
+  #     - ./services/profiles-api/srcs:/run/srcs
+  #   ports:
+  #     - "127.0.0.1:3003:3000"
+  #   networks:
+  #     - credentials
+
+networks:
+  frontend:
+    driver: bridge
+  credentials:
+    driver: bridge
+  profiles:
+    driver: bridge
+
+secrets:
+  ssl-crt: 
+    file: ./secrets/localhost.crt
+  ssl-key: 
+    file: ./secrets/localhost.key
