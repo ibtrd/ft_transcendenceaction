@@ -1,23 +1,15 @@
 import Babact from "babact";
-import { Router, Route, Routes } from "babact-router-dom";
-import useEffect from "babact/dist/hooks/useEffect";
+import { Router, Route, Routes, Link } from "babact-router-dom";
+
+
 
 function View1() {
-
-    const [count, setCount] = Babact.useState(0);
-  
-    useEffect(() => {
-        console.log(count);
-        if (count > 5)
-            setCount(0);
-    }, [count]);
 
     return (
         <div>
             <h1>View 1</h1>
             <p>Some text</p>
-            <p>Count: {count}</p>
-            <button onClick={() => setCount(count + 1)}>Increment</button>
+            <Link to="/view2">View 2</Link>
         </div>
     );
 }
@@ -28,6 +20,7 @@ function View2() {
         <div>
             <h1>View 2</h1>
             <p>Some text</p>
+            <Link to="/view1">View 1</Link>
         </div>
     );
 }
@@ -46,5 +39,5 @@ function App()  {
 
 
 const container = document.getElementById("root");
-Babact.render(<View1/>, container);
+Babact.render(<App/>, container);
 
