@@ -1,4 +1,4 @@
-import db from "../database.js";
+import db from "./database.js";
 
 // /v1/accounts routes
 export default function accountsRoutes(fastify, opts, done) {

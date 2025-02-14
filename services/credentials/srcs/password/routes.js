@@ -1,9 +1,9 @@
 import db from "../database.js";
-import schema from "../fortytwo/shema.js";
+import schema from "./shema.js";
 
-// /v1/password routes
-export default function fortytwoRoutes(fastify, opts, done) {
-  // Get fortytwo_auth table entries
+// /v1/google routes
+export default function passwordRoutes(fastify, opts, done) {
+  // Get password_auth table entries
   fastify.get("/", async function handler(request, reply) {
     const { limit = 30, offset = 0 } = request.query;
 
@@ -13,26 +13,26 @@ export default function fortytwoRoutes(fastify, opts, done) {
     const safeOffset = Math.max(parseInt(offset, 10) || 0, 0);
 
     return db
-      .prepare(`SELECT * FROM fortytwo_auth LIMIT ? OFFSET ?`)
+      .prepare(`SELECT * FROM password_auth LIMIT ? OFFSET ?`)
       .all(safeLimit, safeOffset);
   });
 
-  // Get the account associated to a 42intra user_id
-  fastify.get("/:user_id", async function handler(request, reply) {
-    const { user_id } = request.params;
+  // Get the password based account associated to an email
+  fastify.get("/:email", async function handler(request, reply) {
+    const { email } = request.params;
 
     const account = db
       .prepare(
         `
-      SELECT accounts.id, accounts.email, fortytwo_auth.*
+      SELECT accounts.id, accounts.email, password_auth.*
       FROM accounts
-      INNER JOIN fortytwo_auth
-        ON accounts.id = fortytwo_auth.id
-      WHERE auth_method = 'fortytwo_auth'
-        AND fortytwo_auth.user_id = ?;
+      INNER JOIN password_auth
+        ON accounts.id = password_auth.id
+      WHERE auth_method = 'password_auth'
+        AND email = ?
     `
       )
-      .get(user_id);
+      .get(email);
 
     if (!account) {
       reply.status(404).send({ error: "Account not found" });
@@ -40,9 +40,9 @@ export default function fortytwoRoutes(fastify, opts, done) {
     return account;
   });
 
-  // Create a fortytwo auth based account
+  // Create an email/password based account
   fastify.post("/", { schema }, async function handler(request, reply) {
-    const { email, user_id } = request.body;
+    const { email, hash, salt } = request.body;
 
     try {
       const result = db.transaction(() => {
@@ -50,7 +50,7 @@ export default function fortytwoRoutes(fastify, opts, done) {
           .prepare(
             `
           INSERT INTO accounts (email, auth_method)
-          VALUES (?, 'fortytwo_auth')
+          VALUES (?, 'password_auth')
           RETURNING id
         `
           )
@@ -59,12 +59,12 @@ export default function fortytwoRoutes(fastify, opts, done) {
         return db
           .prepare(
             `
-          INSERT INTO fortytwo_auth (id, user_id)
-          VALUES (?, ?)
+          INSERT INTO password_auth (id, hash, salt)
+          VALUES (?, ?, ?)
           RETURNING *
         `
           )
-          .get(accountId.id, user_id);
+          .get(accountId.id, hash, salt);
       })();
       return reply.status(201).send(result);
     } catch (err) {
