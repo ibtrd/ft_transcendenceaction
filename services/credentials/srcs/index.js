@@ -1,6 +1,30 @@
 import Fastify from "fastify";
 const fastify = Fastify();
 
+import swagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
+async function setUpSwagger() {
+  await fastify.register(swagger, {
+    openapi: {
+      info: {
+        title: "API de Bastien",
+        description: "Documentation de mon API REST",
+        version: "1.0.0",
+      },
+      servers: [{ url: "http://localhost:3000", description: "Credentials (Private)" }],
+    },
+  });
+
+  await fastify.register(fastifySwaggerUi, {
+    routePrefix: "/api-docs",
+  });
+
+}
+
+if (process.env.NODE_ENV !== "production") {
+  setUpSwagger();
+}
+
 import fastifyFormbody from "@fastify/formbody";
 fastify.register(fastifyFormbody);
 

@@ -4,7 +4,25 @@ import schema from "./shema.js";
 // /v1/password routes
 export default function fortytwoRoutes(fastify, opts, done) {
   // Get fortytwo_auth table entries
-  fastify.get("/", async function handler(request, reply) {
+  fastify.get("/", {
+    schema: {
+      description: "Récupère tous les comptes fortytwo_auth",
+      tags: ["Utilisateurs"],
+      response: {
+        200: {
+          description: "Liste des comptes fortytwo_auth",
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "integer", example: 1 },
+              name: { type: "string", example: "Bastien" },
+            },
+          },
+        },
+      },
+    },
+  }, async function handler(request, reply) {
     const { limit = 30, offset = 0 } = request.query;
 
     // Cap limit to 100
