@@ -91,15 +91,15 @@ async function generateUserToken(code) {
 
 async function setJWT(fastify, reply, id) {
   const token = fastify.jwt.sign({ id }, { expiresIn: '15m' });
+  const decoded = fastify.jwt.decode(token);
   reply.setCookie("access_token", token, {
     httpOnly: true,
     secure: true,
     sameSite: "strict",
     path: "/",
   });
-  reply.code(200).send({
-    message: "Authentication successful",
-    account: { id }
+  return reply.send({
+    token, expire_at: new Date(decoded.exp * 1000).toISOString()
   });
 }
 

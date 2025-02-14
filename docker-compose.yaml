@@ -42,20 +42,21 @@ services:
       - credentials
       - frontend
     
-  # password-auth:
-  #   build:
-  #     context: services/password-auth/
-  #     dockerfile: Dockerfile.dev
-  #   volumes:
-  #     - ./services/password-auth/srcs:/services/password-auth/srcs
-  #   environment:
-  #     - PASSWORD_PEPPER=${PASSWORD_PEPPER}
-  #     - JWT_SECRET=$(JWT_SECRET)
-  #   ports:
-  #     - "127.0.0.1:3002:3000"
-  #   networks:
-  #     - credentials
-  #     - frontend
+  password-auth:
+    build:
+      context: services/password-auth/
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./services/password-auth/srcs:/services/password-auth/srcs
+      - ./modules/:/modules:ro
+    environment:
+      - PASSWORD_PEPPER=${PASSWORD_PEPPER}
+      - JWT_SECRET=$(JWT_SECRET)
+    ports:
+      - "127.0.0.1:3002:3000"
+    networks:
+      - credentials
+      - frontend
   
   fortytwo-auth:
     build:
