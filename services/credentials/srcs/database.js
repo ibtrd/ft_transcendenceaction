@@ -14,7 +14,6 @@ db.exec(`
   )
 `);
 
-
 db.exec(`
   CREATE TRIGGER IF NOT EXISTS update_accounts_updated_at
   AFTER UPDATE ON accounts

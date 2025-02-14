@@ -1,4 +1,3 @@
-
 const emailSchema = {
     type: "string",
     format: "email",

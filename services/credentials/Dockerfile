@@ -1,6 +1,6 @@
 FROM node:23.7-alpine3.20
 
-WORKDIR /run
+WORKDIR /services/credentials/
 COPY . .
 
 RUN npm install

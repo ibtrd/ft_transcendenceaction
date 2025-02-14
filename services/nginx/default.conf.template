@@ -11,14 +11,14 @@ server {
         index index.html;
     }
 
-    location /api/registration/ {
-        rewrite ^/api/registration/(.*)$ /$1 break;
+    location /api/register/ {
+        rewrite ^/api/register/(.*)$ /$1 break;
         proxy_pass http://registration:3000;
     }
 
-    location /api/authentification/ {
-        rewrite ^/api/authentification/(.*)$ /$1 break;
-        proxy_pass http://authentification:3000;
+    location /api/auth/ {
+        rewrite ^/api/auth/(.*)$ /$1 break;
+        proxy_pass http://password-auth:3000;
     }
 
     location /api/auth/fortytwo/ {

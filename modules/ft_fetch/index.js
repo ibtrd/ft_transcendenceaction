@@ -23,6 +23,7 @@ export class HttpError {
   json() {
     return {
       statusCode: this.statusCode,
+      code: `HTTP_ERROR_${this.statusCode}`,
       error: this.error,
       message: this.message
     }

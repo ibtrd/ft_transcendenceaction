@@ -10,8 +10,8 @@ fastify.register(accountsRoutes, { prefix: "/v1/accounts"})
 import passwordRoutes from "./routes/password.js";
 fastify.register(passwordRoutes, { prefix: "/v1/password"})
 
-import googleRoutes from "./routes/google.js";
-fastify.register(googleRoutes, { prefix: "/v1/google"})
+// import googleRoutes from "./routes/google.js";
+// fastify.register(googleRoutes, { prefix: "/v1/google"})
 
 import fortytwoRoutes from "./routes/fortytwo.js";
 fastify.register(fortytwoRoutes, { prefix: "/v1/fortytwo"})
