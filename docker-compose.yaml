@@ -3,7 +3,6 @@ services:
     image: nginx:1.26.3-alpine
     volumes:
       - ./services/nginx:/etc/nginx/templates:ro
-      - ./front:/front
     ports:
       - "8080:443"
     networks:

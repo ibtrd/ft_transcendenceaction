@@ -1,18 +1,17 @@
 import Babact from "babact";
-import RouterContext from "./RouterContext.js";
+import useNavigate from "./useNavigate.js";
 
-export default function Link({to, children}: {to: string, children?: any}) {
+export default function Link({to, children, ...props}: {to: string, children?: any}) {
 
-	const { setCurrentPath } = Babact.useContext(RouterContext);
+	const navigate = useNavigate();
 
 	const handleClick = (e: any) => {
 		e.preventDefault();
-		window.history.pushState(null, "", to);
-		setCurrentPath(to);
+		navigate(to);
 	};
 
 	return ( 
-		<a href={to} onClick={handleClick}>
+		<a href={to} onClick={handleClick} {...props}>
 			{children}
 		</a>
 	);

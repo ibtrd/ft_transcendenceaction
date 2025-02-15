@@ -16,5 +16,4 @@ const Babact = {
 	useContext,
 	createContext
 }
-
 export default Babact;
