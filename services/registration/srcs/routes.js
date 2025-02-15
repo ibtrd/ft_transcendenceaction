@@ -11,7 +11,7 @@ export default function routes(fastify, opts, done) {
     const hash = await hashPassword(password);
     // Add account to database
     try {
-      const newAccount = await ft_fetch(`http://credentials:3000/v1/password`, {
+      const newAccount = await ft_fetch(`http://credentials:3000/password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

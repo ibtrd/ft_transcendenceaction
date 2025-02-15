@@ -29,7 +29,7 @@ export default function routes(fastify, opts, done) {
     try {
       const user = await getIntraUser(code);
       try {
-        const account = await ft_fetch(`http://credentials:3000/v1/fortytwo/${user.id}`);
+        const account = await ft_fetch(`http://credentials:3000/fortytwo/${user.id}`);
         console.log(account);
         return await setJWT(fastify, reply, account.id);
       } catch (err) {
@@ -104,7 +104,7 @@ async function setJWT(fastify, reply, id) {
 }
 
 async function createAccount(fastify, reply, user) {
-  const account = await ft_fetch(`http://credentials:3000/v1/fortytwo`, {
+  const account = await ft_fetch(`http://credentials:3000/fortytwo`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

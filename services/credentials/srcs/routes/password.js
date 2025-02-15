@@ -1,13 +1,40 @@
 'use strict';
 
 import db from "../app/database.js";
+import { schemas } from "yatt-utils";
 
 export default function router(fastify, opts, done) {
   let schema;
 
+  schema = {
+    querystring: {
+      type: 'object',
+      properties: {
+        limit: schemas.property.limit,
+        offset: schemas.property.offset,
+      }
+    },
+    response: {
+      200: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            // id: { type: 'integer' },
+            // username: { type: 'string' },
+            // email: { type: 'string', format: 'email' },
+            // password_hash: { type: 'string' },
+            // created_at: { type: 'string', format: 'date-time' },
+            // updated_at: { type: 'string', format: 'date-time' }
+          },
+          required: ['id', 'username', 'email', 'password_hash', 'created_at', 'updated_at']
+        }
+      }
+    }
+  };
   // Get password_auth table entries
   fastify.get("/", async function handler(request, reply) {
-    const { limit = 30, offset = 0 } = request.query;
+    const { limit, offset } = request.query;
 
     // Cap limit to 100
     const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 30, 10), 100);

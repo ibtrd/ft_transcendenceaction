@@ -3,9 +3,9 @@ services:
     image: nginx:1.26.3-alpine
     volumes:
       - ./services/nginx:/etc/nginx/templates:ro
-      - ./front:/front
     ports:
-      - "8080:443"
+      - "8080:80"
+      - "7979:79"
     networks:
       - frontend
     environment:
@@ -23,7 +23,7 @@ services:
       - ./services/credentials/srcs:/services/credentials/srcs
       - ./modules/:/modules:ro
     ports:
-      - "127.0.0.1:3000:3000"
+      - "127.0.0.1:7002:3000"
     networks:
       - credentials
 
@@ -37,7 +37,7 @@ services:
     environment:
       - PASSWORD_PEPPER=${PASSWORD_PEPPER}
     ports:
-      - "127.0.0.1:3001:3000"
+      - "127.0.0.1:4012:3000"
     networks:
       - credentials
       - frontend
@@ -53,7 +53,7 @@ services:
       - PASSWORD_PEPPER=${PASSWORD_PEPPER}
       - JWT_SECRET=$(JWT_SECRET)
     ports:
-      - "127.0.0.1:3002:3000"
+      - "127.0.0.1:4022:3000"
     networks:
       - credentials
       - frontend
@@ -72,7 +72,7 @@ services:
       - API42_SECRET=${API42_SECRET}
       - API42_REDIRECT_URI=${API42_REDIRECT_URI}
     ports:
-      - "127.0.0.1:3042:3000"
+      - "127.0.0.1:4042:3000"
     networks:
       - credentials
       - frontend
@@ -88,6 +88,19 @@ services:
   #     - "127.0.0.1:3003:3000"
   #   networks:
   #     - credentials
+
+  # swagger:
+  #   build:
+  #     context: services/swagger/
+  #     dockerfile: Dockerfile.dev
+  #   volumes:
+  #     - ./services/swagger/srcs:/services/swagger/srcs
+  #     - ./modules/:/modules:ro
+  #   ports:
+  #     - "127.0.0.1:3000:3000"
+  #   networks:
+  #     - credentials
+  #     - frontend
 
 networks:
   frontend:

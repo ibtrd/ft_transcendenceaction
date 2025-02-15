@@ -3,7 +3,7 @@ FROM node:23.7-alpine3.20
 WORKDIR /services/password-auth/
 COPY . .
 
-RUN npm install
+RUN npm install --production
 
 ENTRYPOINT [ "node",  "srcs/index.js" ]
 

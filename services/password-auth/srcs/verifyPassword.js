@@ -1,3 +1,5 @@
+'use strict';
+
 import crypto from "crypto";
 
 const pepper = process.env.PASSWORD_PEPPER

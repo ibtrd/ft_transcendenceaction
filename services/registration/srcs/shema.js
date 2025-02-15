@@ -11,7 +11,7 @@ const emailSchema = {
     description: "The user's password, must be between 8 and 24 characters"
   };
   
-  // POST /v1/password body validation 
+  // POST /password body validation 
   const schema = {
     body: {
       type: "object",
