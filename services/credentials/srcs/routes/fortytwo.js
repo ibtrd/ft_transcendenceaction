@@ -1,8 +1,10 @@
-import db from "../database.js";
-import schema from "./shema.js";
+'use strict';
 
-// /v1/password routes
-export default function fortytwoRoutes(fastify, opts, done) {
+import db from "../app/database.js";
+
+export default function router(fastify, opts, done) {
+  let schema;
+
   // Get fortytwo_auth table entries
   fastify.get("/", async function handler(request, reply) {
     const { limit = 30, offset = 0 } = request.query;
@@ -41,6 +43,23 @@ export default function fortytwoRoutes(fastify, opts, done) {
   });
 
   // Create a fortytwo auth based account
+  schema = {
+    body: {
+      type: "object",
+      properties: {
+        email: {
+          type: "string",
+          format: "email",
+        },
+        user_id: {
+          type: "integer",
+          minimum: 1,
+        },
+      },
+      required: ["email", "user_id"],
+    },
+  };
+
   fastify.post("/", { schema }, async function handler(request, reply) {
     const { email, user_id } = request.body;
 

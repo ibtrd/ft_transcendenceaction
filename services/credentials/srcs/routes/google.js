@@ -1,7 +1,8 @@
+'use strict';
+
 // import db from "../database.js";
 
-// // /v1/password routes
-// export default function googleRoutes(fastify, opts, done) {
+// export default function router(fastify, opts, done) {
 
 //   // Get google_auth table entries
 //   fastify.get("/", async function handler(request, reply) {

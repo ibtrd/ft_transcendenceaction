@@ -1,8 +1,10 @@
-import db from "../database.js";
-import schema from "./shema.js";
+'use strict';
 
-// /v1/google routes
-export default function passwordRoutes(fastify, opts, done) {
+import db from "../app/database.js";
+
+export default function router(fastify, opts, done) {
+  let schema;
+
   // Get password_auth table entries
   fastify.get("/", async function handler(request, reply) {
     const { limit = 30, offset = 0 } = request.query;
@@ -41,6 +43,18 @@ export default function passwordRoutes(fastify, opts, done) {
   });
 
   // Create an email/password based account
+  schema = {
+    body: {
+      type: "object",
+      properties: {
+        email: emailSchema,
+        hash: hashSchema,
+        salt: saltSchema,
+      },
+      required: ["email", "hash", "salt"],
+    },
+  };
+  
   fastify.post("/", { schema }, async function handler(request, reply) {
     const { email, hash, salt } = request.body;
 
@@ -82,3 +96,23 @@ export default function passwordRoutes(fastify, opts, done) {
 
   done();
 }
+
+const emailSchema = {
+  type: "string",
+  format: "email",
+  description: "The user's email address",
+};
+
+const hashSchema = {
+  type: "string",
+  minLength: 128,
+  maxLength: 128,
+  description: "The user's hashed password",
+};
+
+const saltSchema = {
+  type: "string",
+  minLength: 64,
+  maxLength: 64,
+  description: "The hashed password salt",
+};

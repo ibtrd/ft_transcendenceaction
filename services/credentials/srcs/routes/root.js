@@ -1,7 +1,9 @@
-import db from "./database.js";
+'use strict';
 
-// /v1/accounts routes
-export default function accountsRoutes(fastify, opts, done) {
+import db from "../app/database.js";
+
+// /accounts routes
+export default function router(fastify, opts, done) {
 
   // Get accounts table entries
   fastify.get("/", async function handler(request, reply) {
