@@ -30,6 +30,9 @@ jobs:
         run: npm install
         working-directory: ./tests
 
+      - name: Create SSL certificate
+        run: make
+
       - name: Run Jest tests
         run: npm test
         working-directory: ./tests
