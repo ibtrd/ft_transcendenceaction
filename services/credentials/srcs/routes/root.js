@@ -1,39 +1,144 @@
-'use strict';
+"use strict";
 
+import { objects, properties } from "yatt-utils";
 import db from "../app/database.js";
 
-// /accounts routes
 export default function router(fastify, opts, done) {
+  let schema = {
+    tags: ["Accounts"],
+    description: "Get all the accounts",
+    querystring: {
+      type: "object",
+      properties: {
+        limit: properties.limit,
+        offset: properties.offset,
+      },
+    },
+    response: {
+      200: {
+        description: "Successful response",
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            account_id: properties.account_id,
+            email: properties.email,
+            auth_method: properties.auth_method,
+            created_at: properties.created_at,
+            updated_at: properties.updated_at,
+          },
+          required: [
+            "account_id",
+            "email",
+            "auth_method",
+            "created_at",
+            "updated_at",
+          ],
+        },
+      },
+    },
+  };
 
-  // Get accounts table entries
-  fastify.get("/", async function handler(request, reply) {
-    const { limit = 30, offset = 0 } = request.query;
-    // Cap limit to 100
-    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 30, 10), 100);
-    // Prevent negative offset 
-    const safeOffset = Math.max(parseInt(offset, 10) || 0, 0);
+  fastify.get("/", { schema }, async function handler(request, reply) {
+    const { limit, offset } = request.query;
 
-    return db.prepare(`SELECT * FROM accounts LIMIT ? OFFSET ?`).all(safeLimit, safeOffset);
+    return db
+      .prepare(`SELECT * FROM accounts LIMIT ? OFFSET ?`)
+      .all(limit, offset);
   });
 
-  // get the account associated to an email
-  fastify.get("/:email", async function handler(request, reply) {
+  schema = {
+    tags: ["Accounts"],
+    description: "Get the account associated with an email address",
+    params: {
+      type: "object",
+      required: ["email"],
+      properties: {
+        email: {
+          type: "string",
+          format: "email",
+          description: "The email address of the account to retrieve",
+        },
+      },
+    },
+    response: {
+      200: {
+        type: "object",
+        properties: {
+          account_id: properties.account_id,
+          email: properties.email,
+          auth_method: properties.auth_method,
+          created_at: properties.created_at,
+          updated_at: properties.updated_at,
+        },
+      },
+      404: {
+        type: "object",
+        properties: objects.errorBody,
+        description: "Account not found",
+      },
+    },
+  };
+
+  fastify.get("/:email", { schema }, async function handler(request, reply) {
     const { email } = request.params;
 
     const account = db
       .prepare(`SELECT * FROM accounts WHERE email = ?`)
       .get(email);
-    
+
     if (!account) {
-      reply.status(404).send({ error: "Account not found" });
+      reply.status(404).send(accountNotFound);
     }
     return account;
   });
 
-  fastify.delete("/", async function handler(request, reply) {
-    const { account_id } = request.query;
-    db.prepare(`DELETE FROM accounts WHERE id = (?)`).run(account_id);
-  });
+  schema = {
+    tags: ["Accounts"],
+    description: "Delete the account associated with an id",
+    params: {
+      type: "object",
+      required: ["account_id"],
+      properties: {
+        account_id: properties.account_id,
+      },
+    },
+    response: {
+      204: {
+        type: "null",
+        description: "Account successfully deleted",
+      },
+      404: {
+        type: "object",
+        properties: objects.errorBody,
+        description: "Account not found",
+      },
+    },
+  };
+
+  fastify.delete(
+    "/:account_id",
+    { schema },
+    async function handler(request, reply) {
+      const { account_id } = request.params;
+
+      const result = db
+        .prepare(`DELETE FROM accounts WHERE account_id = (?)`)
+        .run(account_id);
+      if (!result.changes) {
+        reply.code(404).send(accountNotFound);
+      } else {
+        reply.code(204).send();
+      }
+    }
+  );
 
   done();
 }
+
+const accountNotFound = {
+  statusCode: 404,
+  code: "ACCOUNT_NOT_FOUND",
+  error: "Account Not Found",
+  message: "The requested account does not exist",
+};

@@ -111,7 +111,7 @@ async function createAccount(fastify, reply, user) {
     },
     body: JSON.stringify({
       email: user.email,
-      user_id: user.id
+      intra_user_id: user.id
     }),
   });
   await setJWT(fastify, reply, account.id);

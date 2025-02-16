@@ -15,11 +15,10 @@ export default function build(opts = {}) {
         description: "Internal service managing the credential database",
         version: "1.0.0",
       },
-      servers: [{ url: "http://localhost:7002", description: "Credentials (Private)" }],
-    });
-
-    app.get("/swagger.json", async (_, reply) => {
-      return reply.send(app.swagger());
+      servers: [
+        { url: "http://credentials:3000", description: "Containers network" },
+        { url: "http://localhost:7002", description: "Development network" }
+      ],
     });
   }
 

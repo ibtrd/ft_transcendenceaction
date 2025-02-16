@@ -1,40 +1,36 @@
 'use strict';
 
+import { properties } from "yatt-utils";
 import db from "../app/database.js";
 
 export default function router(fastify, opts, done) {
   let schema;
 
   // Get fortytwo_auth table entries
-  fastify.get("/", async function handler(request, reply) {
-    const { limit = 30, offset = 0 } = request.query;
-
-    // Cap limit to 100
-    const safeLimit = Math.min(Math.max(parseInt(limit, 10) || 30, 10), 100);
-    // Prevent negative offset
-    const safeOffset = Math.max(parseInt(offset, 10) || 0, 0);
+  fastify.get("/", { schema }, async function handler(request, reply) {
+    const { limit, offset } = request.query;
 
     return db
       .prepare(`SELECT * FROM fortytwo_auth LIMIT ? OFFSET ?`)
       .all(safeLimit, safeOffset);
   });
 
-  // Get the account associated to a 42intra user_id
-  fastify.get("/:user_id", async function handler(request, reply) {
-    const { user_id } = request.params;
+  // Get the account associated to a 42intra intra_user_id
+  fastify.get("/:intra_user_id", async function handler(request, reply) {
+    const { intra_user_id } = request.params;
 
     const account = db
       .prepare(
         `
-      SELECT accounts.id, accounts.email, fortytwo_auth.*
+      SELECT accounts.account_id, accounts.email, fortytwo_auth.*
       FROM accounts
       INNER JOIN fortytwo_auth
-        ON accounts.id = fortytwo_auth.id
+        ON accounts.account_id = fortytwo_auth.account_id
       WHERE auth_method = 'fortytwo_auth'
-        AND fortytwo_auth.user_id = ?;
+        AND fortytwo_auth.intra_user_id = ?;
     `
       )
-      .get(user_id);
+      .get(intra_user_id);
 
     if (!account) {
       reply.status(404).send({ error: "Account not found" });
@@ -47,30 +43,24 @@ export default function router(fastify, opts, done) {
     body: {
       type: "object",
       properties: {
-        email: {
-          type: "string",
-          format: "email",
-        },
-        user_id: {
-          type: "integer",
-          minimum: 1,
-        },
+        email: properties.email,
+        intra_user_id: properties.intra_user_id
       },
-      required: ["email", "user_id"],
+      required: ["email", "intra_user_id"],
     },
   };
 
   fastify.post("/", { schema }, async function handler(request, reply) {
-    const { email, user_id } = request.body;
+    const { email, intra_user_id } = request.body;
 
     try {
       const result = db.transaction(() => {
-        const accountId = db
+        const account = db
           .prepare(
             `
           INSERT INTO accounts (email, auth_method)
           VALUES (?, 'fortytwo_auth')
-          RETURNING id
+          RETURNING account_id
         `
           )
           .get(email);
@@ -78,12 +68,12 @@ export default function router(fastify, opts, done) {
         return db
           .prepare(
             `
-          INSERT INTO fortytwo_auth (id, user_id)
+          INSERT INTO fortytwo_auth (account_id, intra_user_id)
           VALUES (?, ?)
           RETURNING *
         `
           )
-          .get(accountId.id, user_id);
+          .get(account.id, intra_user_id);
       })();
       return reply.status(201).send(result);
     } catch (err) {
@@ -92,7 +82,7 @@ export default function router(fastify, opts, done) {
           statusCode: 409,
           code: "AUTH_EMAIL_IN_USE",
           error: "Email Already In Use",
-          message: `This email is already associated with an account.`,
+          message: `This email is already associated with an account`,
         });
       }
       throw err;

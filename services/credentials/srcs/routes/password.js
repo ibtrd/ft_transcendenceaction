@@ -1,7 +1,7 @@
 'use strict';
 
 import db from "../app/database.js";
-import { schemas } from "yatt-utils";
+import { properties } from "yatt-utils";
 
 export default function router(fastify, opts, done) {
   let schema;
@@ -10,8 +10,8 @@ export default function router(fastify, opts, done) {
     querystring: {
       type: 'object',
       properties: {
-        limit: schemas.property.limit,
-        offset: schemas.property.offset,
+        limit: properties.limit,
+        offset: properties.offset,
       }
     },
     response: {
@@ -24,7 +24,7 @@ export default function router(fastify, opts, done) {
             // username: { type: 'string' },
             // email: { type: 'string', format: 'email' },
             // password_hash: { type: 'string' },
-            // created_at: { type: 'string', format: 'date-time' },
+            // created_at: {  },
             // updated_at: { type: 'string', format: 'date-time' }
           },
           required: ['id', 'username', 'email', 'password_hash', 'created_at', 'updated_at']
@@ -53,10 +53,10 @@ export default function router(fastify, opts, done) {
     const account = db
       .prepare(
         `
-      SELECT accounts.id, accounts.email, password_auth.*
+      SELECT accounts.account_id, accounts.email, password_auth.*
       FROM accounts
       INNER JOIN password_auth
-        ON accounts.id = password_auth.id
+        ON accounts.account_id = password_auth.account_id
       WHERE auth_method = 'password_auth'
         AND email = ?
     `
@@ -74,9 +74,9 @@ export default function router(fastify, opts, done) {
     body: {
       type: "object",
       properties: {
-        email: emailSchema,
-        hash: hashSchema,
-        salt: saltSchema,
+        email: properties.email,
+        hash: properties.hash,
+        salt: properties.salt,
       },
       required: ["email", "hash", "salt"],
     },
@@ -87,12 +87,12 @@ export default function router(fastify, opts, done) {
 
     try {
       const result = db.transaction(() => {
-        const accountId = db
+        const account = db
           .prepare(
             `
           INSERT INTO accounts (email, auth_method)
           VALUES (?, 'password_auth')
-          RETURNING id
+          RETURNING account_id
         `
           )
           .get(email);
@@ -100,12 +100,12 @@ export default function router(fastify, opts, done) {
         return db
           .prepare(
             `
-          INSERT INTO password_auth (id, hash, salt)
+          INSERT INTO password_auth (account_id, hash, salt)
           VALUES (?, ?, ?)
           RETURNING *
         `
           )
-          .get(accountId.id, hash, salt);
+          .get(account.account_id, hash, salt);
       })();
       return reply.status(201).send(result);
     } catch (err) {
@@ -114,32 +114,13 @@ export default function router(fastify, opts, done) {
           statusCode: 409,
           code: "AUTH_EMAIL_IN_USE",
           error: "Email Already In Use",
-          message: `This email is already associated with an account.`,
+          message: `This email is already associated with an account`,
         });
       }
+      console.error(err);
       throw err;
     }
   });
 
   done();
 }
-
-const emailSchema = {
-  type: "string",
-  format: "email",
-  description: "The user's email address",
-};
-
-const hashSchema = {
-  type: "string",
-  minLength: 128,
-  maxLength: 128,
-  description: "The user's hashed password",
-};
-
-const saltSchema = {
-  type: "string",
-  minLength: 64,
-  maxLength: 64,
-  description: "The hashed password salt",
-};
